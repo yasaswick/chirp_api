@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+import json
 from .router import user_router
 
 #fast api instance
@@ -39,8 +40,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            jsondata = json.loads(data)
+            # await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await manager.broadcast(jsondata["content"])
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} left the chat")
