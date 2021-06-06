@@ -14,11 +14,12 @@ from ..controller import user_controller
 import json
 import pyrebase
 import tempfile
-from firebase_admin import credentials, auth ,storage
 from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader, APIKey
 
 router = APIRouter(prefix="/user" , tags=["User"])
 
+pb = pyrebase.initialize_app(json.load(open('fbconfig.json')))
+storage = pb.storage()
 
 @router.post("/login" ,  response_model=user_schema.UserViewPrivate)
 def login_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
@@ -27,6 +28,13 @@ def login_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail='Invalid username and/or password')
     token = user_controller.encode_token(db_user.email)
     db_user.token = token
+    return db_user
+
+@router.get('/token',  response_model=user_schema.UserView)
+def get_user_by_token(user_email = Depends(user_controller.auth_wrapper), db: Session = Depends(get_db)):
+    db_user = user_controller.get_user_by_email(db, email= user_email)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
 
@@ -67,9 +75,11 @@ def upload_profile_image(user_email = Depends(user_controller.auth_wrapper), fil
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     result = storage.child('user').child(str(db_user.user_uuid)).put(file.file)
-    db_user.profile_photo = result['name']+'?alt=media&token='+result['downloadTokens']
+    print(result)
+    image_url = result['name']+'?alt=media&token='+result['downloadTokens']
+    db_user.profile_photo = "https://firebasestorage.googleapis.com/v0/b/chirp-yasas.appspot.com/o/" + image_url.replace('/', '%2F')
     db.commit()
-    return {"filename": result['name']+'?alt=media&token='+result['downloadTokens']}
+    return {"filename": image_url.replace('/', '%2F') }
 
     
 @router.get("/{user_uuid}", response_model=user_schema.UserView)

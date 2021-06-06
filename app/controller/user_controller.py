@@ -5,7 +5,7 @@ from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from ..schema import user_schema
-from ..model import user
+from ..model import models
 from datetime import datetime, timedelta
 import time
 
@@ -16,35 +16,34 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 secret = 'SECRET'
 
 def get_user(db: Session, user_id: int):
-    return db.query(user.User).filter(user.User.id == user_id).first()
+    return db.query(models.User).filter(models.User.id == user_id).first()
 
 def get_user_by_uuid(db: Session, user_uuid: str):
-    return db.query(user.User).filter(user.User.user_uuid == user_uuid).first()
+    return db.query(models.User).filter(models.User.user_uuid == user_uuid).first()
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(user.User).filter(user.User.email == email).first()
+    return db.query(models.User).filter(models.User.email == email).first()
     
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(user.User).offset(skip).limit(limit).all()
+    return db.query(models.User).offset(skip).limit(limit).all()
 
 def delete_user_by_id(db: Session, user_id :int):
-    dbuser = db.query(user.User).get(user_id)
+    dbuser = db.query(models.User).get(user_id)
     db.delete(dbuser)
     db.commit()
     return {'message': 'User successfully deleted'}
 
 
 def create_user(db: Session, newuser: user_schema.UserCreate):
-    db_user = user.User(email= newuser.email, 
-    user_id = newuser.user_id,
-    dob = newuser.dob,
-    phone = newuser.phone,
+    db_user = models.User(
+    name = newuser.name,    
+    email= newuser.email, 
+    age = newuser.age,
     bio = newuser.bio,
     hashed_password = newuser.password,
     joined_date = time.time(),
-    location = newuser.location,
     profile_photo = newuser.profile_photo,
-    banner_photo = newuser.banner_photo
+    chat_messages = 0
     )
     db.add(db_user)
     db.commit()
@@ -53,7 +52,7 @@ def create_user(db: Session, newuser: user_schema.UserCreate):
 
 def encode_token( user_id):
     payload = {
-        'exp': datetime.utcnow() + timedelta(days=1, minutes=5),
+        'exp': datetime.utcnow() + timedelta(days=15, minutes=5),
         'iat': datetime.utcnow(),
         'sub': user_id
         }

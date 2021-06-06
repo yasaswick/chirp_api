@@ -9,6 +9,7 @@ class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     user_uuid = Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
+    name = Column(String)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     age = Column(Integer)
@@ -17,3 +18,4 @@ class User(Base):
     profile_photo = Column(String)
     chat_messages = Column(Integer)
     token = Column(String)
+    last_login = Column(String)
