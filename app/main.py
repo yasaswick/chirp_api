@@ -3,8 +3,12 @@ from typing import List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
-app = FastAPI()
+#fast api instance
+app = FastAPI(
+        title="Chirp Api - Equiwatt test"
+)
 
+#connection manager class to handle connection states
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
@@ -23,10 +27,11 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_text(message)
 
-
+#connection manager instantiation
 manager = ConnectionManager()
 
 
+#web sockets
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
@@ -38,3 +43,5 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} left the chat")
+
+#routers
