@@ -20,20 +20,15 @@ from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader, AP
 router = APIRouter(prefix="/user" , tags=["User"])
 
 
-@router.post("/login")
+@router.post("/login" ,  response_model=user_schema.UserViewPrivate)
 def login_user(auth_details: AuthDetails, db: Session = Depends(get_db)):
     db_user = user_controller.get_user_by_email(db,email=auth_details.email)
     if (db_user is None) or (not user_controller.verify_password( plain_password = auth_details.password, hashed_password = db_user.hashed_password)):
         raise HTTPException(status_code=401, detail='Invalid username and/or password')
     token = user_controller.encode_token(db_user.email)
-    return { 'token': token }
-
-@router.get('/token',  response_model=user_schema.UserView)
-def get_user_by_token(user_email = Depends(user_controller.auth_wrapper), db: Session = Depends(get_db)):
-    db_user = user_controller.get_user_by_email(db, email= user_email)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+    db_user.token = token
     return db_user
+
 
 @router.get('/email')
 def check_if_email_exists(user_email : str, db: Session = Depends(get_db)):
@@ -43,15 +38,17 @@ def check_if_email_exists(user_email : str, db: Session = Depends(get_db)):
     else:
         return {'result': True}
 
-
-@router.post("/", response_model=user_schema.UserView)
+@router.post("/", response_model=user_schema.UserViewPrivate)
 def create_user(user_detail: user_schema.UserCreate, db: Session = Depends(get_db)):
     db_user = user_controller.get_user_by_email(db,email=user_detail.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed_password = user_controller.get_password_hash(password= user_detail.password)
     user_detail.password = hashed_password
-    return user_controller.create_user(db=db, newuser=user_detail)
+    new_user = user_controller.create_user(db=db, newuser=user_detail)
+    token = user_controller.encode_token(new_user.email)
+    new_user.token = token
+    return new_user
 
 
 @router.get("/", response_model=List[user_schema.UserView] )

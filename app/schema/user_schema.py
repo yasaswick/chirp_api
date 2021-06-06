@@ -25,6 +25,17 @@ class UserView(UserBase):
         orm_mode = True
 
 
+class UserViewPrivate(UserBase):
+    id: int
+    user_uuid:uuid.UUID
+    joined_date:str
+    chat_messages: int
+    token: str
+
+    class Config:
+        orm_mode = True
+
+
 class User(UserBase):
     id: int
     user_uuid:uuid.UUID

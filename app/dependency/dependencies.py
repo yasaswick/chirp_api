@@ -18,7 +18,7 @@ def get_db():
 
 
 # Firebase Storeage Dependency
-# def get_stor():
-#     pb = pyrebase.initialize_app(json.load(open('fbconfig.json')))
+def get_stor():
+    pb = pyrebase.initialize_app(json.load(open('fbconfig.json')))
 
 
