@@ -2,10 +2,11 @@ from typing import List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
+from .router import user_router
 
 #fast api instance
 app = FastAPI(
-        title="Chirp Api - Equiwatt test"
+        title="Chirp Api - Equiwatt Test"
 )
 
 #connection manager class to handle connection states
@@ -45,3 +46,4 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         await manager.broadcast(f"Client #{client_id} left the chat")
 
 #routers
+app.include_router(user_router.router)
