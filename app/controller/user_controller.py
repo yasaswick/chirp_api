@@ -35,12 +35,15 @@ def delete_user_by_id(db: Session, user_id :int):
 
 
 def create_user(db: Session, newuser: user_schema.UserCreate):
-    db_user = models.User(email= newuser.email, 
-    age = newuser.dob,
+    db_user = models.User(
+    name = newuser.name,    
+    email= newuser.email, 
+    age = newuser.age,
     bio = newuser.bio,
     hashed_password = newuser.password,
     joined_date = time.time(),
     profile_photo = newuser.profile_photo,
+    chat_messages = 0
     )
     db.add(db_user)
     db.commit()
@@ -49,7 +52,7 @@ def create_user(db: Session, newuser: user_schema.UserCreate):
 
 def encode_token( user_id):
     payload = {
-        'exp': datetime.utcnow() + timedelta(days=1, minutes=5),
+        'exp': datetime.utcnow() + timedelta(days=15, minutes=5),
         'iat': datetime.utcnow(),
         'sub': user_id
         }
