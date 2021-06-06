@@ -16,35 +16,31 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 secret = 'SECRET'
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.user.User).filter(models.user.User.id == user_id).first()
+    return db.query(models.User).filter(models.User.id == user_id).first()
 
 def get_user_by_uuid(db: Session, user_uuid: str):
-    return db.query(models.user.User).filter(models.user.User.user_uuid == user_uuid).first()
+    return db.query(models.User).filter(models.User.user_uuid == user_uuid).first()
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.user.User).filter(models.user.User.email == email).first()
+    return db.query(models.User).filter(models.User.email == email).first()
     
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.user.User).offset(skip).limit(limit).all()
+    return db.query(models.User).offset(skip).limit(limit).all()
 
 def delete_user_by_id(db: Session, user_id :int):
-    dbuser = db.query(models.user.User).get(user_id)
+    dbuser = db.query(models.User).get(user_id)
     db.delete(dbuser)
     db.commit()
     return {'message': 'User successfully deleted'}
 
 
 def create_user(db: Session, newuser: user_schema.UserCreate):
-    db_user = models.user.User(email= newuser.email, 
-    user_id = newuser.user_id,
-    dob = newuser.dob,
-    phone = newuser.phone,
+    db_user = models.User(email= newuser.email, 
+    age = newuser.dob,
     bio = newuser.bio,
     hashed_password = newuser.password,
     joined_date = time.time(),
-    location = newuser.location,
     profile_photo = newuser.profile_photo,
-    banner_photo = newuser.banner_photo
     )
     db.add(db_user)
     db.commit()

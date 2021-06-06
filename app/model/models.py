@@ -17,3 +17,4 @@ class User(Base):
     profile_photo = Column(String)
     chat_messages = Column(Integer)
     token = Column(String)
+    last_login = Column(String)
