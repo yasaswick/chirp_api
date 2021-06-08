@@ -3,6 +3,7 @@ from typing import List
 import uuid
 from pydantic import BaseModel
 
+#Schemas used for data validation and serializations
 
 class UserBase(BaseModel):
     name: str
