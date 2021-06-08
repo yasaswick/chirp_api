@@ -77,7 +77,7 @@ def delete_user_by_id(user_id:int , db: Session = Depends(get_db)):
      return user_controller.delete_user_by_id(db, user_id = user_id)
 
 #upload profile image route
-@router.post("/profile_image")
+@router.post("/profile_image", response_model=user_schema.UserView)
 def upload_profile_image(user_email = Depends(user_controller.auth_wrapper), file: UploadFile = File(...) ,  db: Session = Depends(get_db)):
     db_user = user_controller.get_user_by_email(db, email= user_email)
     if db_user is None:
@@ -87,7 +87,7 @@ def upload_profile_image(user_email = Depends(user_controller.auth_wrapper), fil
     image_url = result['name']+'?alt=media&token='+result['downloadTokens']
     db_user.profile_photo = "https://firebasestorage.googleapis.com/v0/b/chirp-yasas.appspot.com/o/" + image_url.replace('/', '%2F')
     db.commit()
-    return {"filename": image_url.replace('/', '%2F') }
+    return db_user
 
 #get user by uuid route
 @router.get("/{user_uuid}", response_model=user_schema.UserView)
